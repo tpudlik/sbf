@@ -1,11 +1,19 @@
 """Spherical Bessel function algorithms implemented using mpmath.
 
+Two different algorithms are implemented for each spherical Bessel function:
+the exact formulas of http://dlmf.nist.gov/10.49 and the expressions in terms
+of the ordinary Bessel functions, http://dlmf.nist.gov/10.47.ii .
+
 """
 
 PRECISION = 50
 
-from mpmath import mp, pi, mpc, factorial, sin, cos, exp
+from mpmath import (mp, pi, mpc, factorial, sin, cos, exp, besselj, bessely,
+                    besseli, besselk, sqrt, hankel1, hankel2)
 mp.dps = PRECISION
+
+
+# Exact expressions #
 
 def sph_jn_exact(n, z):
     """Return the value of j_n computed using the exact formula.
@@ -14,8 +22,8 @@ def sph_jn_exact(n, z):
 
     """
     zm = mpc(z)
-    s1 = sum((-1)**k*_a(2*k, n)/zm**(2k+1) for k in xrange(0, int(n/2) + 1))
-    s2 = sum((-1)**k*_a(2*k+1, n)/zm**(2k+2) for k in xrange(0, int((n-1)/2) + 1))
+    s1 = sum((-1)**k*_a(2*k, n)/zm**(2*k+1) for k in xrange(0, int(n/2) + 1))
+    s2 = sum((-1)**k*_a(2*k+1, n)/zm**(2*k+2) for k in xrange(0, int((n-1)/2) + 1))
     return sin(zm - n*pi/2)*s1 + cos(zm - n*pi/2)*s2
 
 
@@ -26,8 +34,8 @@ def sph_yn_exact(n, z):
 
     """
     zm = mpc(z)
-    s1 = sum((-1)**k*_a(2*k, n)/zm**(2k+1) for k in xrange(0, int(n/2) + 1))
-    s2 = sum((-1)**k*_a(2*k+1, n)/zm**(2k+2) for k in xrange(0, int((n-1)/2) + 1))
+    s1 = sum((-1)**k*_a(2*k, n)/zm**(2*k+1) for k in xrange(0, int(n/2) + 1))
+    s2 = sum((-1)**k*_a(2*k+1, n)/zm**(2*k+2) for k in xrange(0, int((n-1)/2) + 1))
     return -cos(zm - n*pi/2)*s1 + sin(zm - n*pi/2)*s2
 
 
@@ -108,3 +116,28 @@ def _a(k, n):
         else:
             A_CACHE[(k, n)] = 0
             return 0
+
+
+# Ordinary Bessel function expressions #
+
+def sph_jn_bessel(n, z):
+    return besselj(n + mpc(1,0)/2, z)*sqrt(pi/(2*z))
+
+def sph_yn_bessel(n, z):
+    return bessely(n + mpc(1,0)/2, z)*sqrt(pi/(2*z))
+
+def sph_h1n_bessel(n, z):
+    return hankel1(n + mpc(1,0)/2, z)*sqrt(pi/(2*z))
+
+def sph_h2n_bessel(n, z):
+    return hankel2(n + mpc(1,0)/2, z)*sqrt(pi/(2*z))
+
+def sph_i1n_bessel(n, z):
+    return besseli(n + mpc(1,0)/2, z)*sqrt(pi/(2*z))
+
+def sph_i2n_bessel(n, z):
+    return besseli(- n - mpc(1,0)/2, z)*sqrt(pi/(2*z))
+
+def sph_kn_bessel(n, z):
+    return besselk(n + mpc(1,0)/2, z)*sqrt(pi/(2*z))
+
