@@ -4,7 +4,7 @@ A number of algorithms exist for computing the values of
 [spherical Bessel functions][1] with fixed-precision arithmetic.  This
 repository contains implementations of these algorithms, as well as code for
 comparing their accuracy over a wide range of parameters.  It's an extension
-of the work of [Jabłoński][2] to complex-valued arguments.
+of the work of [Jabłoński (1994)][2] to complex-valued arguments.
 
 The ultimate objective of this work is to design a new implementation
 of spherical Bessel functions for [SciPy][3].
