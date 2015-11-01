@@ -1,30 +1,21 @@
 """This module computes the reference values, i.e. values of the spherical
-Bessel functions accurate to a specified number of significant figures at a
-number of points in the complex plane.
+Bessel functions accurate to a specified tolerance at a number of points in
+the complex plane.
 
-This is done by computing the function values using two different algorithms
+This is done by computing the function values with two different algorithms
 implemented using `mpmath`, an arbitrary-precision floating-point arithmetic
 library.  The precision of the computation is increased until the outputs of
-the two algorithms agree to a specified number of significant figures.
+the two algorithms agree to a specified absolute and relative tolerance.
 
 Note: computing the reference values takes a long time!
 
 """
-
-# TODO: I don't like the np.array based implementation I used here and in
-# reference_points.  In retrospect, I would prefer to have reference_points,
-# reference_orders and compute_values to return regular iterables, rather than
-# numpy arrays.  The trouble with the latter is that they end up packed with
-# mpf and mpc objects anyway, and I have to constantly think which numpy
-# methods will work for them, and which won't.  A good-ol iterable-based
-# implementation would be easier to reason about.
-
 import itertools
 import sys
 from os import path
 
 import numpy as np
-import mpmath
+from mpmath import mp, mpf
 
 # Path hack
 sys.path.append( path.dirname( path.dirname( path.abspath(__file__) ) ) )
@@ -35,14 +26,14 @@ from algos.sbf_mp import (sph_jn_exact, sph_yn_exact, sph_h1n_exact,
                           sph_h1n_bessel, sph_h2n_bessel, sph_i1n_bessel,
                           sph_i2n_bessel, sph_kn_bessel)
 from accuracy.reference_points import reference_orders, reference_points
-from accuracy.config import TARGET_PRECISION
+from accuracy.config import STARTING_PRECISION, ATOL, RTOL, PRECISION_STEP
 
 
 def compute_values(precision, algorithm):
     """Return the values of the spherical Bessel functions, computed 
     to the given precision.
 
-    The sizes of the returned 2D ndarrays are determined by the config
+    The sizes of the returned 3D ndarrays are determined by the config
     settings.
 
     Parameters
@@ -64,7 +55,7 @@ def compute_values(precision, algorithm):
     sph_kn: ndarray
 
     """
-    mpmath.mp.dps = precision
+    mp.dps = precision
 
     if algorithm == "exact":
         sph_jn  = np.vectorize(sph_jn_exact)
@@ -97,24 +88,26 @@ def compute_values(precision, algorithm):
             sph_kn( orders, domain))
 
 
-def all_arrays_close_enough(atuple, btuple, precision):
-    """Assert all arrays in tuples a and b are within precision."""
+def mpc_close_enough(a, b, atol, rtol):
+    """Assert mpmath.mpc objects a and b are within tolerance."""
 
-    # TODO: This function is not yet correctly implemented.  The subtlety is
-    # that the arrays contain complex elements, so you can't just compare them
-    # to 10**(-precision).
+    real = abs(a.real - b.real) <= (10**mpf(atol) + 10**mpf(rtol) * abs(b.real))
+    imag = abs(a.imag - b.imag) <= (10**mpf(atol) + 10**mpf(rtol) * abs(b.imag))
+    return (real and imag)
 
-    def iter():
-        for a, b in itertools.izip(atuple, btuple)
-            underestimate = a/b - 1 < 10**(-precision)
-            overestimate = b/a - 1 < 10**(-precision)
-            yield np.all(np.logical_or(underestimate, overestimate))
-    
-    return all(iter())
+
+arrays_close_enough = np.vectorize(mpc_close_enough)
+
+
+def all_arrays_close_enough(atuple, btuple, atol, rtol):
+    """Assert all arrays in tuples a and b are within tolerance."""
+
+    return all(np.all(arrays_close_enough(a, b, atol, rtol))
+               for a, b, in itertools.izip(atuple, btuple))
 
 
 if __name__ == "__main__":
-    precision = 15
+    precision = STARTING_PRECISION
     done = False
     print "Starting computation with precision of {}...".format(precision)
 
@@ -122,17 +115,17 @@ if __name__ == "__main__":
         exact  = compute_values(precision, "exact")
         bessel = compute_values(precision, "bessel")
         
-        if all_arrays_close_enough(exact, bessel, TARGET_PRECISION):
-            print "Success! Values at all points agree to {} significant figures".format(TARGET_PRECISION)
+        if all_arrays_close_enough(exact, bessel, ATOL, RTOL):
+            print "Success! Values at all points agree to target tolerance"
             np.savez("reference_values.npz",
-                     sph_jn=exact[0],
-                     sph_yn=exact[1],
-                     sph_h1n=exact[2],
-                     sph_h2n=exact[3],
-                     sph_i1n=exact[4],
-                     sph_i2n=exact[5],
-                     sph_kn=exact[6])
+                     sph_jn =(exact[0] + bessel[0])/2,
+                     sph_yn =(exact[1] + bessel[1])/2,
+                     sph_h1n=(exact[2] + bessel[2])/2,
+                     sph_h2n=(exact[3] + bessel[3])/2,
+                     sph_i1n=(exact[4] + bessel[4])/2,
+                     sph_i2n=(exact[5] + bessel[5])/2,
+                     sph_kn =(exact[6] + bessel[6])/2)
             done = True
         else:
+            precision += PRECISION_STEP
             print "Incrementing precision to {} ...".format(precision)
-            precision += 5

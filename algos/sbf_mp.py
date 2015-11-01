@@ -5,8 +5,8 @@ the exact formulas of http://dlmf.nist.gov/10.49 and the expressions in terms
 of the ordinary Bessel functions, http://dlmf.nist.gov/10.47.ii .
 
 """
-from mpmath import (mp, pi, mpc, factorial, sin, cos, exp, besselj, bessely,
-                    besseli, besselk, sqrt, hankel1, hankel2)
+from mpmath import (mp, pi, mpc, mpf, factorial, sin, cos, exp, besselj, 
+                    bessely, besseli, besselk, sqrt, hankel1, hankel2)
 
 # Exact expressions #
 
@@ -92,7 +92,7 @@ def sph_kn_exact(n, z):
 
 
 A_CACHE = {}
-def _a(k, n):
+def _a(k, n, dps=mp.dps):
     """Return the value of the Bessel asymptotic expansion coefficient.
 
     Defined as in http://dlmf.nist.gov/10.49#E1 , except I use the notation
@@ -100,39 +100,58 @@ def _a(k, n):
     performance, since these coefficients must be computed many times.
 
     """
-    if (k, n) in A_CACHE:
-        return A_CACHE[(k, n)]
+    if (k, n, dps) in A_CACHE:
+        return A_CACHE[(k, n, dps)]
     else:
         if k <= n:
             f = factorial # Abbreviation to make code more readable
-            v = f(n + k)/( mpc(2,0)**k * f(k) * f(n - k) )
-            A_CACHE[(k, n)] = v
+            v = f(n + k)/( mpf(2)**k * f(k) * f(n - k) )
+            A_CACHE[(k, n, dps)] = v
             return v
         else:
-            A_CACHE[(k, n)] = 0
+            A_CACHE[(k, n, dps)] = 0
             return 0
 
 
 # Ordinary Bessel function expressions #
 
 def sph_jn_bessel(n, z):
-    return besselj(n + mpc(1,0)/2, z)*sqrt(pi/(2*z))
+    out = besselj(n + mpf(1)/2, z)*sqrt(pi/(2*z))
+    if mpc(z).imag == 0:
+        return out.real # Small imaginary parts are spurious
+    else:
+        return out
 
 def sph_yn_bessel(n, z):
-    return bessely(n + mpc(1,0)/2, z)*sqrt(pi/(2*z))
+    out = bessely(n + mpf(1)/2, z)*sqrt(pi/(2*z))
+    if mpc(z).imag == 0:
+        return out.real
+    else:
+        return out
 
 def sph_h1n_bessel(n, z):
-    return hankel1(n + mpc(1,0)/2, z)*sqrt(pi/(2*z))
+    return hankel1(n + mpf(1)/2, z)*sqrt(pi/(2*z))
 
 def sph_h2n_bessel(n, z):
-    return hankel2(n + mpc(1,0)/2, z)*sqrt(pi/(2*z))
+    return hankel2(n + mpf(1)/2, z)*sqrt(pi/(2*z))
 
 def sph_i1n_bessel(n, z):
-    return besseli(n + mpc(1,0)/2, z)*sqrt(pi/(2*z))
+    out = besseli(n + mpf(1)/2, z)*sqrt(pi/(2*z))
+    if mpc(z).imag == 0:
+        return out.real
+    else:
+        return out
 
 def sph_i2n_bessel(n, z):
-    return besseli(- n - mpc(1,0)/2, z)*sqrt(pi/(2*z))
+    out = besseli(- n - mpf(1)/2, z)*sqrt(pi/(2*z))
+    if mpc(z).imag == 0:
+        return out.real
+    else:
+        return out
 
 def sph_kn_bessel(n, z):
-    return besselk(n + mpc(1,0)/2, z)*sqrt(pi/(2*z))
-
+    out = besselk(n + mpf(1)/2, z)*sqrt(pi/(2*z))
+    if mpc(z).imag == 0:
+        return out.real
+    else:
+        return out
