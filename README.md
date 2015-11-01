@@ -60,3 +60,6 @@ section is correct.  Correctness is defined (somewhat arbitrarily, but
 following Jabłoński) as matching the first 10 significant figures of the exact
 result.
 
+## Unit tests ##
+
+To run the algorithms' unit tests, run `nosetests` in the `sbf` directory.

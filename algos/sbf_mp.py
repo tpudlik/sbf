@@ -5,13 +5,8 @@ the exact formulas of http://dlmf.nist.gov/10.49 and the expressions in terms
 of the ordinary Bessel functions, http://dlmf.nist.gov/10.47.ii .
 
 """
-
-PRECISION = 50
-
 from mpmath import (mp, pi, mpc, factorial, sin, cos, exp, besselj, bessely,
                     besseli, besselk, sqrt, hankel1, hankel2)
-mp.dps = PRECISION
-
 
 # Exact expressions #
 
