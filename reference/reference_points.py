@@ -7,7 +7,7 @@ import numpy as np
 # Path hack
 sys.path.append( path.dirname( path.dirname( path.abspath(__file__) ) ) )
 
-from accuracy.config import (INNER_RADIUS, OUTER_RADIUS, RADIAL_POINTS,
+from reference.config import (INNER_RADIUS, OUTER_RADIUS, RADIAL_POINTS,
                                  ANGULAR_POINTS, MAX_ORDER)
 
 def reference_points():

@@ -26,8 +26,8 @@ from algos.sbf_mp import (sph_jn_exact, sph_yn_exact, sph_h1n_exact,
                           sph_kn_exact, sph_jn_bessel, sph_yn_bessel,
                           sph_h1n_bessel, sph_h2n_bessel, sph_i1n_bessel,
                           sph_i2n_bessel, sph_kn_bessel)
-from accuracy.reference_points import reference_points
-from accuracy.config import STARTING_PRECISION, MAX_PRECISION, ATOL, RTOL
+from reference.reference_points import reference_points
+from reference.config import STARTING_PRECISION, MAX_PRECISION, ATOL, RTOL
 
 
 def reference_value(point, order, sbf):
