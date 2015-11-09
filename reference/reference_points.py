@@ -52,7 +52,9 @@ def reference_points_complex():
     radii = radius_array()
     phases = np.exp(1j*np.arange(1, ANGULAR_POINTS + 1, dtype=np.complex128)
                     *2*np.pi/(ANGULAR_POINTS + 1))
-    complex_points = iter(np.outer(radii, phases).flatten())
+    complex_points = iter(np.outer(radii, phases).transpose().flatten())
+    # The transpose above guarantees that radii are iterated over first,
+    # before phases.
     orders = xrange(MAX_ORDER + 1)
     return itertools.product(complex_points, orders)
 

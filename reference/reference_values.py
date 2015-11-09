@@ -10,8 +10,7 @@ the two algorithms agree to a specified absolute and relative tolerance.
 Note: computing the reference values takes a long time!
 
 """
-import itertools
-import sys
+import itertools, sys, logging
 from os import path
 import cPickle as pickle
 
@@ -56,8 +55,8 @@ def reference_value(point, order, sbf):
     f2 = choose_function(sbf, "bessel")
     mp.dps = STARTING_PRECISION
     while True:
-        exact = f1(point, order)
-        bessel = f2(point, order)
+        exact  = f1(order, point)
+        bessel = f2(order, point)
         if mpc_close_enough(exact, bessel, ATOL, RTOL):
             if exact.imag == 0:
                 return np.float64(exact.real)
@@ -66,6 +65,7 @@ def reference_value(point, order, sbf):
         else:
             mp.dps = mp.dps + mp.dps/2
             if mp.dps > MAX_PRECISION:
+                logging.warning("No convergence at max precision for {} of order {} at {}".format(sbf, order, point))
                 return np.nan
 
 
@@ -101,11 +101,12 @@ def mpc_close_enough(a, b, atol, rtol):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(filename='reference_values.log', level=logging.DEBUG)
     sbf_list = ["jn", "yn", "h1n", "h2n", "i1n", "i2n", "kn"]
     for sbf in sbf_list:
-        values = map(lambda p: reference_value(p[1], p[0], sbf),
+        values = map(lambda p: reference_value(p[0], p[1], sbf),
                      reference_points())
         print "Computed {} values!".format(sbf)
-        with open(sbf + ".pickle", "wb") as f:
-            pickle.dump(values, f)
+        # with open(sbf + ".pickle", "wb") as f:
+        #     pickle.dump(values, f)
         np.save(sbf + ".npy", np.array(values, dtype=np.complex128))
