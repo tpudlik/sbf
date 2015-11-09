@@ -2,4 +2,4 @@
 *.npz
 *.npy
 *.pickle
-
+*.log

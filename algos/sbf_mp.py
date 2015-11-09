@@ -5,8 +5,10 @@ the exact formulas of http://dlmf.nist.gov/10.49 and the expressions in terms
 of the ordinary Bessel functions, http://dlmf.nist.gov/10.47.ii .
 
 """
-from mpmath import (mp, pi, mpc, mpf, factorial, sin, cos, exp, besselj, 
-                    bessely, besseli, besselk, sqrt, hankel1, hankel2)
+from numpy import iscomplex
+from mpmath import (mp, pi, mpc, mpf, factorial, fac2, sin, cos, exp, besselj,
+                    bessely, besseli, besselk, sqrt, hankel1, hankel2,
+                    mpmathify)
 
 # Exact expressions #
 
@@ -16,7 +18,7 @@ def sph_jn_exact(n, z):
     The expression used is http://dlmf.nist.gov/10.49.E1 .
 
     """
-    zm = mpc(z)
+    zm = mpmathify(z)
     s1 = sum((-1)**k*_a(2*k, n)/zm**(2*k+1) for k in xrange(0, int(n/2) + 1))
     s2 = sum((-1)**k*_a(2*k+1, n)/zm**(2*k+2) for k in xrange(0, int((n-1)/2) + 1))
     return sin(zm - n*pi/2)*s1 + cos(zm - n*pi/2)*s2
@@ -28,7 +30,7 @@ def sph_yn_exact(n, z):
     The expression used is http://dlmf.nist.gov/10.49.E4 .
 
     """
-    zm = mpc(z)
+    zm = mpmathify(z)
     s1 = sum((-1)**k*_a(2*k, n)/zm**(2*k+1) for k in xrange(0, int(n/2) + 1))
     s2 = sum((-1)**k*_a(2*k+1, n)/zm**(2*k+2) for k in xrange(0, int((n-1)/2) + 1))
     return -cos(zm - n*pi/2)*s1 + sin(zm - n*pi/2)*s2
@@ -40,7 +42,7 @@ def sph_h1n_exact(n, z):
     The expression used is http://dlmf.nist.gov/10.49.E6 .
 
     """
-    zm = mpc(z)
+    zm = mpmathify(z)
     s = sum(mpc(0,1)**(k-n-1)*_a(k, n)/zm**(k+1) for k in xrange(n+1))
     return exp(mpc(0,1)*zm)*s
 
@@ -51,7 +53,7 @@ def sph_h2n_exact(n, z):
     The expression used is http://dlmf.nist.gov/10.49.E7 .
 
     """
-    zm = mpc(z)
+    zm = mpmathify(z)
     s = sum(mpc(0,-1)**(k-n-1)*_a(k, n)/zm**(k+1) for k in xrange(n+1))
     return exp(mpc(0,-1)*zm)*s
 
@@ -62,7 +64,7 @@ def sph_i1n_exact(n, z):
     The expression used is http://dlmf.nist.gov/10.49.E8 .
 
     """
-    zm = mpc(z)
+    zm = mpmathify(z)
     s1 = sum(mpc(-1,0)**k * _a(k, n)/zm**(k+1) for k in xrange(n+1))
     s2 = sum(_a(k, n)/zm**(k+1) for k in xrange(n+1))
     return exp(zm)/2 * s1 + mpc(-1,0)**(n + 1)*exp(-zm)/2 * s2
@@ -74,7 +76,7 @@ def sph_i2n_exact(n, z):
     The expression used is http://dlmf.nist.gov/10.49.E10 .
 
     """
-    zm = mpc(z)
+    zm = mpmathify(z)
     s1 = sum(mpc(-1,0)**k * _a(k, n)/zm**(k+1) for k in xrange(n+1))
     s2 = sum(_a(k, n)/zm**(k+1) for k in xrange(n+1))
     return exp(zm)/2 * s1 + mpc(-1,0)**n*exp(-zm)/2 * s2
@@ -86,7 +88,7 @@ def sph_kn_exact(n, z):
     The expression used is http://dlmf.nist.gov/10.49.E12 .
 
     """
-    zm = mpc(z)
+    zm = mpmathify(z)
     s = sum(_a(k, n)/zm**(k+1) for k in xrange(n+1))
     return pi*exp(-zm)/2*s
 
@@ -117,14 +119,14 @@ def _a(k, n, dps=mp.dps):
 
 def sph_jn_bessel(n, z):
     out = besselj(n + mpf(1)/2, z)*sqrt(pi/(2*z))
-    if mpc(z).imag == 0:
+    if mpmathify(z).imag == 0:
         return out.real # Small imaginary parts are spurious
     else:
         return out
 
 def sph_yn_bessel(n, z):
     out = bessely(n + mpf(1)/2, z)*sqrt(pi/(2*z))
-    if mpc(z).imag == 0:
+    if mpmathify(z).imag == 0:
         return out.real
     else:
         return out
@@ -137,21 +139,29 @@ def sph_h2n_bessel(n, z):
 
 def sph_i1n_bessel(n, z):
     out = besseli(n + mpf(1)/2, z)*sqrt(pi/(2*z))
-    if mpc(z).imag == 0:
+    if mpmathify(z).imag == 0:
         return out.real
     else:
         return out
 
 def sph_i2n_bessel(n, z):
     out = besseli(- n - mpf(1)/2, z)*sqrt(pi/(2*z))
-    if mpc(z).imag == 0:
+    if mpmathify(z).imag == 0:
         return out.real
     else:
         return out
 
 def sph_kn_bessel(n, z):
     out = besselk(n + mpf(1)/2, z)*sqrt(pi/(2*z))
-    if mpc(z).imag == 0:
+    if mpmathify(z).imag == 0:
         return out.real
     else:
         return out
+
+
+# Power series (experimental)
+
+def sph_jn_power(n, z, terms=100):
+    zm = mpmathify(z)
+    s = sum((-z**2/2)**k/(factorial(k) * fac2(2*n + 2*k + 1)) for k in xrange(terms))
+    return zm**n * s
