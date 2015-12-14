@@ -1,5 +1,7 @@
-*.pyc
+*.db
+*.log
 *.npz
 *.npy
 *.pickle
-*.log
+*.png
+*.pyc
