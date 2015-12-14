@@ -2,10 +2,8 @@
 Bessel functions accurate to a specified tolerance at a number of points in
 the complex plane.
 
-This is done by computing the function values with two different algorithms
-implemented using `mpmath`, an arbitrary-precision floating-point arithmetic
-library.  The precision of the computation is increased until the outputs of
-the two algorithms agree to a specified absolute and relative tolerance.
+The script creates two sets of files: .npy files with double-precision
+values, and .pickle files with arbitrary precision (mpf, mpc) values.
 
 Note: computing the reference values takes a long time!
 
@@ -20,13 +18,12 @@ from mpmath import mp, mpf
 # Path hack
 sys.path.append( path.dirname( path.dirname( path.abspath(__file__) ) ) )
 
-from algos.sbf_mp import (sph_jn_exact, sph_yn_exact, sph_h1n_exact,
-                          sph_h2n_exact, sph_i1n_exact, sph_i2n_exact,
-                          sph_kn_exact, sph_jn_bessel, sph_yn_bessel,
+from algos.sbf_mp import (sph_jn_bessel, sph_yn_bessel,
                           sph_h1n_bessel, sph_h2n_bessel, sph_i1n_bessel,
                           sph_i2n_bessel, sph_kn_bessel)
 from reference.reference_points import reference_points
-from reference.config import STARTING_PRECISION, MAX_PRECISION, ATOL, RTOL
+from reference.config import (STARTING_PRECISION, MAX_PRECISION, ATOL, RTOL,
+                              PRECISION_STEP)
 
 
 def reference_value(point, order, sbf):
@@ -51,11 +48,11 @@ def reference_value(point, order, sbf):
         The value of the requested Bessel function.
 
     """
-    f = choose_function(sbf, "bessel")
+    f = choose_function(sbf)
     mp.dps = STARTING_PRECISION
     while True:
         lower  = f(order, point)
-        mp.dps = mp.dps + 10
+        mp.dps = mp.dps + PRECISION_STEP
         higher = f(order, point)
         if mpc_close_enough(lower, higher, ATOL, RTOL):
             if higher.imag == 0:
@@ -63,33 +60,21 @@ def reference_value(point, order, sbf):
             else:
                 return np.complex128(higher)
         else:
-            mp.dps = mp.dps - 10 + mp.dps/2
+            mp.dps = mp.dps - PRECISION_STEP + mp.dps/2
             if mp.dps > MAX_PRECISION:
                 logging.warning("No convergence at max precision for {} of order {} at {}".format(sbf, order, point))
                 return np.nan
 
 
-def choose_function(sbf, algorithm):
-    if algorithm == "exact":
-        if sbf == "jn": return sph_jn_exact
-        if sbf == "yn": return sph_yn_exact
-        if sbf == "h1n": return sph_h1n_exact
-        if sbf == "h2n": return sph_h2n_exact
-        if sbf == "i1n": return sph_i1n_exact
-        if sbf == "i2n": return sph_i2n_exact
-        if sbf == "kn": return sph_kn_exact
-        raise ValueError("Unrecognized sbf: {}".format(sbf))
-    elif algorithm == "bessel":
-        if sbf == "jn": return sph_jn_bessel
-        if sbf == "yn": return sph_yn_bessel
-        if sbf == "h1n": return sph_h1n_bessel
-        if sbf == "h2n": return sph_h2n_bessel
-        if sbf == "i1n": return sph_i1n_bessel
-        if sbf == "i2n": return sph_i2n_bessel
-        if sbf == "kn": return sph_kn_bessel
-        raise ValueError("Unrecognized sbf: {}".format(sbf))
-    else:
-        raise ValueError("Unrecognized algorithm: {}".format(algorithm))
+def choose_function(sbf):
+    if sbf == "jn": return sph_jn_bessel
+    if sbf == "yn": return sph_yn_bessel
+    if sbf == "h1n": return sph_h1n_bessel
+    if sbf == "h2n": return sph_h2n_bessel
+    if sbf == "i1n": return sph_i1n_bessel
+    if sbf == "i2n": return sph_i2n_bessel
+    if sbf == "kn": return sph_kn_bessel
+    raise ValueError("Unrecognized sbf: {}".format(sbf))
 
 
 def mpc_close_enough(a, b, atol, rtol):
@@ -107,6 +92,6 @@ if __name__ == "__main__":
         values = map(lambda p: reference_value(p[0], p[1], sbf),
                      reference_points())
         print "Computed {} values!".format(sbf)
-        # with open(sbf + ".pickle", "wb") as f:
-        #     pickle.dump(values, f)
+        with open(sbf + ".pickle", "wb") as f:
+            pickle.dump(values, f)
         np.save(sbf + ".npy", np.array(values, dtype=np.complex128))

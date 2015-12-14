@@ -13,10 +13,10 @@ INNER_RADIUS = -3
 OUTER_RADIUS = 4
 
 # Number of points to sample in the radial direction; default 100
-RADIAL_POINTS = 10**1
+RADIAL_POINTS = 10**2
 
 # Number of points to sample in the angular direction; default 5
-ANGULAR_POINTS = 2
+ANGULAR_POINTS = 5
 
 # Largest order to consider; default 200
 MAX_ORDER = 200
@@ -25,12 +25,15 @@ MAX_ORDER = 200
 STARTING_PRECISION = 256
 
 # Maximum precision to attempt before giving up; default 2000
-MAX_PRECISION = 2000
+MAX_PRECISION = 3000
+
+# Precision increase for estimating convergence.
+PRECISION_STEP = 10
 
 # The base-10 logarithm of the absolute precision to which the two mpmath
-# algorithms must agree for a value to be declared correct. Default -300.
+# results must agree for a value to be declared correct. Default -300.
 ATOL = -50
 
 # The base-10 logarith of the relative precision to which the two mpmath
-# algorithms must agree for a value to be declared correct. Default -15.
+# results must agree for a value to be declared correct. Default -10.
 RTOL = -10
