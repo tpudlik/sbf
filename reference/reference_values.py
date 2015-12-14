@@ -32,8 +32,8 @@ from reference.config import STARTING_PRECISION, MAX_PRECISION, ATOL, RTOL
 def reference_value(point, order, sbf):
     """Return the value of the spherical Bessel function at a point.
 
-    The precision of the computation is increased until the two algorithms
-    used agree to within ATOL and RTOL.
+    The precision of the computation is increased until the obtained value
+    stabilizes to within ATOL and RTOL.
 
     Parameters
     ----------
@@ -51,19 +51,19 @@ def reference_value(point, order, sbf):
         The value of the requested Bessel function.
 
     """
-    f1 = choose_function(sbf, "exact")
-    f2 = choose_function(sbf, "bessel")
+    f = choose_function(sbf, "bessel")
     mp.dps = STARTING_PRECISION
     while True:
-        exact  = f1(order, point)
-        bessel = f2(order, point)
-        if mpc_close_enough(exact, bessel, ATOL, RTOL):
-            if exact.imag == 0:
-                return np.float64(exact.real)
+        lower  = f(order, point)
+        mp.dps = mp.dps + 10
+        higher = f(order, point)
+        if mpc_close_enough(lower, higher, ATOL, RTOL):
+            if higher.imag == 0:
+                return np.float64(higher.real)
             else:
-                return np.complex128(exact)
+                return np.complex128(higher)
         else:
-            mp.dps = mp.dps + mp.dps/2
+            mp.dps = mp.dps - 10 + mp.dps/2
             if mp.dps > MAX_PRECISION:
                 logging.warning("No convergence at max precision for {} of order {} at {}".format(sbf, order, point))
                 return np.nan

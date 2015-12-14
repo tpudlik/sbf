@@ -163,5 +163,5 @@ def sph_kn_bessel(n, z):
 
 def sph_jn_power(n, z, terms=100):
     zm = mpmathify(z)
-    s = sum((-z**2/2)**k/(factorial(k) * fac2(2*n + 2*k + 1)) for k in xrange(terms))
+    s = sum((-zm**2/2)**k/(factorial(k) * fac2(2*n + 2*k + 1)) for k in xrange(terms))
     return zm**n * s

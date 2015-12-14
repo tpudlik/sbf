@@ -46,7 +46,8 @@ def make_accuracy_plot(point, value, reference, atol, rtol, filename):
     z = np.reshape(point['z'], (RADIAL_POINTS, MAX_ORDER + 1))
     n = np.reshape(point['n'], (RADIAL_POINTS, MAX_ORDER + 1))
     error_1D = (np.abs(value - reference) - atol)/(np.abs(reference)*rtol)
-    error = np.reshape(error_1D, (RADIAL_POINTS, MAX_ORDER + 1))
+    error = np.reshape(np.clip(error_1D, 0, np.inf),
+                       (RADIAL_POINTS, MAX_ORDER + 1))
     log_error = np.log10(np.clip(error, 1, np.inf))
     imdata = np.ma.masked_invalid(log_error)
 
@@ -54,8 +55,9 @@ def make_accuracy_plot(point, value, reference, atol, rtol, filename):
     cmap.set_bad('r', 1)
 
     fig, ax = plt.subplots()
-    im = ax.pcolormesh(np.log10(np.abs(z.transpose())), n.transpose(), imdata.transpose(),
-                       cmap=cmap)
+    im = ax.pcolormesh(np.log10(np.abs(z.transpose())), n.transpose(),
+                       imdata.transpose(),
+                       cmap=cmap, vmin=0, vmax=5)
     plt.colorbar(im)
     ax.set_xlim((INNER_RADIUS, OUTER_RADIUS))
     ax.set_ylim((0, imdata.shape[1]))
