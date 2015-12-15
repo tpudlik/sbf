@@ -22,6 +22,7 @@ def recurrence_pattern(n, z, f0, f1):
 
 
 def v_recurrence_pattern(n, z, f0, f1):
+    # This seems correct but produces seg faults.
     out = np.empty((n + z).shape)
     s0 = np.ones(shape=out.shape)*f0
     s1 = np.ones(shape=out.shape)*f1
@@ -36,36 +37,35 @@ def v_recurrence_pattern(n, z, f0, f1):
     return out
 
 
-def sph_jn_inner(n, z):
+@np.vectorize
+def sph_jn(n, z):
     return recurrence_pattern(n, z,
                               np.sin(z)/z,
                               np.sin(z)/z**2 - np.cos(z)/z)
 
-def sph_yn_inner(n, z):
+@np.vectorize
+def sph_yn(n, z):
     return recurrence_pattern(n, z,
                               -np.cos(z)/z,
                               -np.cos(z)/z**2 - np.sin(z)/z)
 
-def sph_in1_inner(n, z):
+@np.vectorize
+def sph_in1(n, z):
     return recurrence_pattern(n, z,
                               np.sinh(z)/z,
                               -np.sinh(z)/z**2 + np.cosh(z)/z)
 
-def sph_in2_inner(n, z):
+@np.vectorize
+def sph_in2(n, z):
     return recurrence_pattern(n, z,
                               np.cosh(z)/z,
                               -np.cosh(z)/z**2 + np.sinh(z)/z)
 
-def sph_kn_inner(n, z):
+@np.vectorize
+def sph_kn(n, z):
     return recurrence_pattern(n, z,
                               np.pi/2*np.exp(-z)/z,
                               np.pi/2*np.exp(-z)*(1/z + 1/z**2))
-
-sph_jn = np.vectorize(sph_jn_inner)    
-sph_yn = np.vectorize(sph_yn_inner)
-sph_in1 = np.vectorize(sph_in1_inner)
-sph_in2 = np.vectorize(sph_in2_inner)
-sph_kn = np.vectorize(sph_kn_inner)
 
 def sph_h1n(n, z):
     return sph_jn(n, z) + 1j*sph_yn(n, z)

@@ -104,7 +104,17 @@ def make_accuracy_plot(point, value, reference, atol, rtol, filename,
 
 
 def compute_error(value, reference, atol, rtol):
-    return (np.abs(value - reference) - atol)/(np.abs(reference)*rtol)
+    out = np.empty(np.shape(reference))
+
+    denominator = np.abs(reference)*rtol
+
+    idx = (denominator == 0)
+    out[idx] = np.abs(value[idx])/atol
+
+    idx = (denominator != 0)
+    out[idx] = (np.abs(value[idx] - reference[idx]) - atol)/denominator[idx]
+    
+    return out
 
 
 def get_ref_values(sbf):
@@ -124,10 +134,11 @@ if __name__ == '__main__':
                         choices=["jn", "yn", "h1n", "h2n", "i1n", "i2n", "kn"])
     parser.add_argument("algo",
                         help="The algorithm to create plots for.",
-                        choices=["default", "bessel", "a_recur", "power_series"])
+                        choices=["default", "bessel", "a_recur", "cai",
+                                 "power_series", "d_recur_miller"])
     args = parser.parse_args()
 
     m = importlib.import_module("algos.{}".format(args.algo))
     f = getattr(m, "sph_{}".format(args.sbf))
 
-    accuracy_plot(f, args.sbf, 10**(-45), 10**(-10))
+    accuracy_plot(f, args.sbf, 10**(-100), 10**(-10))

@@ -13,7 +13,7 @@ from os import path
 import cPickle as pickle
 
 import numpy as np
-from mpmath import mp, mpf
+from mpmath import mp, mpf, nan
 
 # Path hack
 sys.path.append( path.dirname( path.dirname( path.abspath(__file__) ) ) )
@@ -55,15 +55,21 @@ def reference_value(point, order, sbf):
         mp.dps = mp.dps + PRECISION_STEP
         higher = f(order, point)
         if mpc_close_enough(lower, higher, ATOL, RTOL):
-            if higher.imag == 0:
-                return np.float64(higher.real)
-            else:
-                return np.complex128(higher)
+            return higher
         else:
             mp.dps = mp.dps - PRECISION_STEP + mp.dps/2
             if mp.dps > MAX_PRECISION:
                 logging.warning("No convergence at max precision for {} of order {} at {}".format(sbf, order, point))
-                return np.nan
+                return mpmath.nan
+
+
+def mpc_to_np(x):
+    if x == nan:
+        return np.nan
+    if x.imag == 0:
+        return np.float64(x.real)
+    
+    return np.complex128(x)
 
 
 def choose_function(sbf):
@@ -91,7 +97,8 @@ if __name__ == "__main__":
     for sbf in sbf_list:
         values = map(lambda p: reference_value(p[0], p[1], sbf),
                      reference_points())
-        print "Computed {} values!".format(sbf)
         with open(sbf + ".pickle", "wb") as f:
             pickle.dump(values, f)
-        np.save(sbf + ".npy", np.array(values, dtype=np.complex128))
+        np.save(sbf + ".npy", np.array(map(mpc_to_np, values),
+                                       dtype=np.complex128))
+        print "Computed {} values!".format(sbf)
