@@ -78,10 +78,9 @@ def make_accuracy_plot(point, value, reference, atol, rtol, filename,
     n = np.reshape(point['n'], (RADIAL_POINTS, MAX_ORDER + 1))
     
     error_1D = compute_error(value, reference, atol, rtol)
-    error = np.reshape(np.clip(error_1D, 0, np.inf),
+    error = np.reshape(error_1D,
                        (RADIAL_POINTS, MAX_ORDER + 1))
-    log_error = np.log10(np.clip(error, 1, np.inf))
-    imdata = np.ma.masked_invalid(log_error)
+    imdata = np.ma.masked_invalid(error)
 
     cmap = plt.cm.Greys
     cmap.set_bad('r', 1)
@@ -109,12 +108,12 @@ def compute_error(value, reference, atol, rtol):
     denominator = np.abs(reference)*rtol
 
     idx = (denominator == 0)
-    out[idx] = np.abs(value[idx])/atol
+    out[idx] = (np.abs(value[idx])-atol)/rtol
 
     idx = (denominator != 0)
     out[idx] = (np.abs(value[idx] - reference[idx]) - atol)/denominator[idx]
     
-    return out
+    return np.log10(np.clip(out, 10**(-300), np.inf))
 
 
 def get_ref_values(sbf):
