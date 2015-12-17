@@ -145,7 +145,8 @@ if __name__ == '__main__':
     parser.add_argument("algo",
                         help="The algorithm to create plots for.",
                         choices=["default", "bessel", "a_recur", "cai",
-                                 "power_series", "d_recur_miller"])
+                                 "power_series", "d_recur_miller",
+                                 "candidate"])
     args = parser.parse_args()
 
     m = importlib.import_module("algos.{}".format(args.algo))
