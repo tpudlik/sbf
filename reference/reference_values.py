@@ -13,7 +13,7 @@ from os import path
 import cPickle as pickle
 
 import numpy as np
-from mpmath import mp, mpf, nan
+from mpmath import mp, mpf, isnan
 
 # Path hack
 sys.path.append( path.dirname( path.dirname( path.abspath(__file__) ) ) )
@@ -64,7 +64,7 @@ def reference_value(point, order, sbf):
 
 
 def mpc_to_np(x):
-    if x == nan:
+    if isnan(x):
         return np.nan
     if x.imag == 0:
         return np.float64(x.real)
@@ -101,4 +101,6 @@ if __name__ == "__main__":
             pickle.dump(values, f)
         np.save(sbf + ".npy", np.array(map(mpc_to_np, values),
                                        dtype=np.complex128))
-        print "Computed {} values!".format(sbf)
+        msg = "Computed {} values!".format(sbf)
+        print msg
+        logging.info(msg)

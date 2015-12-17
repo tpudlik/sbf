@@ -17,7 +17,7 @@ from matplotlib import pyplot as plt
 from reference_points import reference_points
 from reference_values import mpc_to_np
 from config import (MAX_ORDER, RADIAL_POINTS, ANGULAR_POINTS, INNER_RADIUS,
-                    OUTER_RADIUS, MAX_PRECISION)
+                    OUTER_RADIUS, STARTING_PRECISION)
 
 def sig_figs_jy(jn, jn1, yn, yn1, z):
     """Check relation http://dlmf.nist.gov/10.50 .
@@ -40,10 +40,11 @@ def sig_figs_jy(jn, jn1, yn, yn1, z):
 
     """
     w = mpmath.fabs(z**2*(jn1*yn - jn*yn1) - 1)
+    if not mpmath.isfinite(w):
+        return w
     if w > 0:
         return 1 - mpmath.log10(w)
     else:
-        # w == 0 to (at least) current working precision.
         return mpmath.mp.dps
 
 
@@ -107,13 +108,13 @@ def make_plot(point, value, filename, title):
     ax.set_ylabel("order")
     if title:
         ax.set_title(title)
-    
+
     plt.savefig(filename)
     plt.close(fig)
 
 
 if __name__ == '__main__':
-    mpmath.mp.dps = MAX_PRECISION
+    mpmath.mp.dps = STARTING_PRECISION
     jn, yn = reference_data()
     sig_figs = reference_sig_figs(reference_points(), jn, yn)
     plots_from_generators(reference_points(), sig_figs, "jnyn")

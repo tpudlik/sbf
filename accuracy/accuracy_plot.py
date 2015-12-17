@@ -88,7 +88,7 @@ def make_accuracy_plot(point, value, reference, atol, rtol, filename,
     fig, ax = plt.subplots()
     im = ax.pcolormesh(np.log10(np.abs(z.transpose())), n.transpose(),
                        imdata.transpose(),
-                       cmap=cmap, vmin=0, vmax=5)
+                       cmap=cmap, vmin=1, vmax=5)
     plt.colorbar(im)
     ax.set_xlim((INNER_RADIUS, OUTER_RADIUS))
     ax.set_ylim((0, imdata.shape[1]))
@@ -112,7 +112,18 @@ def compute_error(value, reference, atol, rtol):
 
     idx = (denominator != 0)
     out[idx] = (np.abs(value[idx] - reference[idx]) - atol)/denominator[idx]
-    
+
+    # Covers np.inf
+    idx = (value == reference)
+    out[idx] = np.zeros(out.shape)[idx]
+
+    # Covers complex infinity
+    idx = np.logical_and(np.logical_and(np.iscomplex(value),
+                                        np.isinf(value)),
+                         np.logical_and(np.iscomplex(reference),
+                                        np.isinf(reference)))
+    out[idx] = np.zeros(out.shape)[idx]
+
     return np.log10(np.clip(out, 10**(-300), np.inf))
 
 
@@ -140,4 +151,4 @@ if __name__ == '__main__':
     m = importlib.import_module("algos.{}".format(args.algo))
     f = getattr(m, "sph_{}".format(args.sbf))
 
-    accuracy_plot(f, args.sbf, 10**(-100), 10**(-10))
+    accuracy_plot(f, args.sbf, 10**(-100), 10**(-14))

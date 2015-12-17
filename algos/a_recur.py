@@ -68,8 +68,9 @@ def sph_kn(n, z):
                               np.pi/2*np.exp(-z)*(1/z + 1/z**2))
 
 def sph_h1n(n, z):
-    return sph_jn(n, z) + 1j*sph_yn(n, z)
+    return recurrence_pattern(n, z, -1j*np.exp(1j*z)/z, 
+                              -(1j/z + 1)*np.exp(1j*z)/z)
 
 def sph_h2n(n, z):
-    return sph_jn(n, z) - 1j*sph_yn(n, z)
-
+    return recurrence_pattern(n, z, 1j*np.exp(-1j*z)/z,
+                              (1j/z - 1)*np.exp(-1j*z)/z)
