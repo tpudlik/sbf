@@ -42,11 +42,11 @@ def sph_yn(n, z):
     return recurrence_pattern(n, z, -np.cos(z)/z)
 
 @np.vectorize
-def sph_in1(n, z):
+def sph_i1n(n, z):
     return recurrence_pattern(n, z, np.sinh(z)/z)
 
 @np.vectorize
-def sph_in2(n, z):
+def sph_i2n(n, z):
     return recurrence_pattern(n, z, np.cosh(z)/z)
 
 @np.vectorize

@@ -8,6 +8,7 @@ from scipy.misc import factorial, factorial2
 
 
 def recurrence_pattern(n, z, f0, f1):
+    """Ascending recurrence for jn, yn, h1n, h2n."""
     s0 = f0
     if n == 0:
         return s0
@@ -18,6 +19,24 @@ def recurrence_pattern(n, z, f0, f1):
         sn = (2*idx + 3)/z*s1 - s0
         s0 = s1
         s1 = sn
+        if np.isinf(sn):
+            return sn
+    return sn
+
+def modified_recurrence_pattern(n, z, f0, f1):
+    """Ascending recurrence for i1n, i2n, (-1)^n * kn."""
+    s0 = f0
+    if n == 0:
+        return s0
+    s1 = f1
+    if n == 1:
+        return s1
+    for idx in xrange(n - 1):
+        sn = -(2*idx + 3)/z*s1 + s0
+        s0 = s1
+        s1 = sn
+        if np.isinf(sn):
+            return sn
     return sn
 
 
@@ -50,27 +69,29 @@ def sph_yn(n, z):
                               -np.cos(z)/z**2 - np.sin(z)/z)
 
 @np.vectorize
-def sph_in1(n, z):
-    return recurrence_pattern(n, z,
-                              np.sinh(z)/z,
-                              -np.sinh(z)/z**2 + np.cosh(z)/z)
+def sph_i1n(n, z):
+    return modified_recurrence_pattern(n, z,
+                                       np.sinh(z)/z,
+                                       -np.sinh(z)/z**2 + np.cosh(z)/z)
 
 @np.vectorize
-def sph_in2(n, z):
-    return recurrence_pattern(n, z,
-                              np.cosh(z)/z,
-                              -np.cosh(z)/z**2 + np.sinh(z)/z)
+def sph_i2n(n, z):
+    return modified_recurrence_pattern(n, z,
+                                       np.cosh(z)/z,
+                                       -np.cosh(z)/z**2 + np.sinh(z)/z)
 
 @np.vectorize
 def sph_kn(n, z):
-    return recurrence_pattern(n, z,
+    return (-1)**n * modified_recurrence_pattern(n, z,
                               np.pi/2*np.exp(-z)/z,
                               np.pi/2*np.exp(-z)*(1/z + 1/z**2))
 
+@np.vectorize
 def sph_h1n(n, z):
     return recurrence_pattern(n, z, -1j*np.exp(1j*z)/z, 
                               -(1j/z + 1)*np.exp(1j*z)/z)
 
+@np.vectorize
 def sph_h2n(n, z):
     return recurrence_pattern(n, z, 1j*np.exp(-1j*z)/z,
                               (1j/z - 1)*np.exp(-1j*z)/z)

@@ -37,11 +37,11 @@ def order(n, z):
     s = np.abs(np.sin(np.angle(z)))
     o_approx = np.floor((1.83 + 4.1*s**0.36)*np.abs(z)**(0.91 - 0.43*s**0.33) + 9*(1 - np.sqrt(s)))
     o_min = n + 1
-    o_max = int(235 + 5*np.sqrt(np.abs(z)))
+    o_max = np.floor(235 + 50*np.sqrt(np.abs(z)))
     if o_approx < o_min:
         return o_min
     if o_approx > o_max:
-        return o_max
+        return int(o_max)
     else:
         return int(o_approx)
 
