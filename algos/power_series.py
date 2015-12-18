@@ -12,7 +12,33 @@ def sph_jn(n, z, terms=50):
     return z**n * s
 
 
-def sph_yn(n, z, terms=50):
+@np.vectorize
+def sph_yn_v(n, z, terms=25):
+    # Doesn't handle overflow errors properly
+    n = int(n)
+    s1 = 0
+    for k in xrange(n + 1):
+        s = (z**2/2)**k * factorial2(2*n - 2*k - 1)/factorial(k)
+        if np.isnan(s) or np.isinf(s):
+            break
+        else:
+            s1 += s
+
+    s2 = 0
+    for k in xrange(n + 1, terms):
+        s = (-z**2/2)**k/(factorial(k) * factorial2(2*k - 2*n - 1))
+        if np.isnan(s) or np.isinf(s):
+            break
+        else:
+            s2 += s
+
+    try:
+        return -1/z**(n + 1) * s1 + (-z)**(-n - 1) * s2
+    except (OverflowError, ZeroDivisionError):
+        return np.nan
+
+
+def sph_yn(n, z, terms=25):
     n = np.asarray(n, dtype=int)
     z = np.asarray(z)
 

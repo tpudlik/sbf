@@ -14,6 +14,7 @@ def sph_jn(n, z):
     out = _sph_jn_bessel(n, z)
     idx = np.logical_and(np.isreal(z), np.abs(z) > n)
     if np.any(idx):
+        # Ascending recurrence is more accurate for large real z
         out[idx] = _sph_jn_a_recur(n[idx], z[idx])
     return out
 
@@ -22,8 +23,10 @@ def sph_yn(n, z):
     idx = np.isreal(z)
     out =  _sph_yn_bessel(n, z)
     if np.any(idx):
+        # Ascending recurrence is more accurate for real z
         out[idx] = _sph_yn_a_recur(n[idx], z[idx])
-
+    if np.any(np.iscomplex(out)):
+        out[np.logical_and(np.isnan(out), np.iscomplex(out))] = np.inf*(1+1j)
     return out
 
 
@@ -61,6 +64,9 @@ def recurrence_pattern(n, z, f0, f1):
         sn = (2*idx + 3)/z*s1 - s0
         s0 = s1
         s1 = sn
+        if np.isinf(sn):
+            # Overflow occurred already: terminate recurrence.
+            return sn
     return sn
 
 
