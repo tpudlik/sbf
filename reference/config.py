@@ -10,7 +10,7 @@ respect to angle and the *logarithm* of the radius.
 INNER_RADIUS = -3
 
 # Decimal logarithm of the outer radius; default 4
-OUTER_RADIUS = 4
+OUTER_RADIUS = 5
 
 # Number of points to sample in the radial direction; default 100
 RADIAL_POINTS = 10**2
@@ -25,15 +25,15 @@ MAX_ORDER = 200
 STARTING_PRECISION = 256
 
 # Maximum precision to attempt before giving up; default 2000
-MAX_PRECISION = 3000
+MAX_PRECISION = 5000
 
 # Precision increase for estimating convergence.
-PRECISION_STEP = 10
+PRECISION_STEP = 20
 
 # The base-10 logarithm of the absolute precision to which the two mpmath
 # results must agree for a value to be declared correct. Default -300.
-ATOL = -50
+ATOL = -100
 
 # The base-10 logarith of the relative precision to which the two mpmath
 # results must agree for a value to be declared correct. Default -10.
-RTOL = -10
+RTOL = -15
