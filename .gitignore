@@ -5,3 +5,6 @@
 *.pickle
 *.png
 *.pyc
+*.txt
+*.pstats
+
