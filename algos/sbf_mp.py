@@ -146,17 +146,11 @@ def sph_i1n_bessel(n, z):
 
 def sph_i2n_bessel(n, z):
     out = besseli(- n - mpf(1)/2, z)*sqrt(pi/(2*z))
-    if mpmathify(z).imag == 0:
-        return out.real
-    else:
-        return out
+    return out
 
 def sph_kn_bessel(n, z):
     out = besselk(n + mpf(1)/2, z)*sqrt(pi/(2*z))
-    if mpmathify(z).imag == 0:
-        return out.real
-    else:
-        return out
+    return out
 
 
 # Power series (experimental)

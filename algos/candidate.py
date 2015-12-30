@@ -30,6 +30,10 @@ def sph_yn(n, z):
     return out
 
 
+def sph_i2n(n, z):
+    return (1j)**(-n-1)*sph_yn(n, 1j*z)
+
+
 @np.vectorize
 def _sph_jn_a_recur(n, z):
     return recurrence_pattern(n, z,

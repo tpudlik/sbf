@@ -69,4 +69,5 @@ points along each of 5 rays in the complex plane are used. The reference
 ## Unit tests ##
 
 To run the algorithms' unit tests, run `nosetests` in the `sbf` directory.
-These tests only check the `mpmath` algorithms.
+These tests only check the `mpmath` algorithms used for computing the
+reference values.

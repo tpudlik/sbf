@@ -92,15 +92,22 @@ def mpc_close_enough(a, b, atol, rtol):
 
 
 if __name__ == "__main__":
+    import argparse
+
     logging.basicConfig(filename='reference_values.log', level=logging.DEBUG)
-    sbf_list = ["jn", "yn", "h1n", "h2n", "i1n", "i2n", "kn"]
-    for sbf in sbf_list:
-        values = map(lambda p: reference_value(p[0], p[1], sbf),
-                     reference_points())
-        with open(sbf + ".pickle", "wb") as f:
-            pickle.dump(values, f)
-        np.save(sbf + ".npy", np.array(map(mpc_to_np, values),
-                                       dtype=np.complex128))
-        msg = "Computed {} values!".format(sbf)
-        print msg
-        logging.info(msg)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("sbf",
+                        help="The spherical Bessel function to compute reference values for.",
+                        choices=["jn", "yn", "h1n", "h2n", "i1n", "i2n", "kn"])
+    args = parser.parse_args()
+
+    values = map(lambda p: reference_value(p[0], p[1], args.sbf),
+                 reference_points())
+    with open(args.sbf + ".pickle", "wb") as f:
+        pickle.dump(values, f)
+    np.save(args.sbf + ".npy", np.array(map(mpc_to_np, values),
+                                        dtype=np.complex128))
+    msg = "Computed {} values!".format(args.sbf)
+    print msg
+    logging.info(msg)
